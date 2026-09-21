@@ -1,0 +1,104 @@
+public class StringCount {
+
+    // String Count (contar el nº de palabras de una cadena sabiendo que están separadas por 1 o más espacios)
+    public static int countWords(String text) {
+        // Devuelve 0 si el texto es nulo
+        if (text == null || text.isEmpty()) // Para evitar errores de tipo NullPointerException
+            return 0;
+        
+        int count = 0;
+        for (int i = 0; i < text.length(); i++) {
+            // Si no es un espacio incrementa el contador
+            if (text.charAt(i) != ' ' && (i == 0 || text.charAt(i-1)==' ')) {
+                count++;
+            }
+        }
+
+        return count; // Devolver la longitud de la cadena
+    }
+
+    // countChar (contar cuántas veces aparece un carácter específico c diferenciando mayúsculas y minúsculas)
+    public static int countChar(String text, char c) {
+        // Validamos si el texto es nulo
+        if (text == null || text.isEmpty()) {
+            return 0;
+        }
+        int count = 0; // Inicializamos contador a 0
+        // Recorremos la cadena carácter a carácter
+        for (int i = 0; i < text.length(); i++) {
+            // Si el carácter i coincide exactamente con c, incrementamos contador (count++)
+            if (text.charAt(i) == c) { // text.charAt para obtener carácter en posición concreta
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // countCharIgnoringCase (similar al anterior, pero ignorando mayúsculas y minúsculas)
+    public static int countCharIgnoringCase(String text, char c) {
+        // Si está vacío devuelve 0
+        if (text == null) {
+            return 0;
+        }
+        // Carácter en sus dos versiones (mayúscula y minúscula)
+        char lowerC = Character.toLowerCase(c); // Minúsculas
+        char upperC = Character.toUpperCase(c); // Mayúsculas
+        int count = 0; // Inicializar la cuenta en 0
+        // Recorremos texto posición por posición
+        for (int i = 0; i < text.length(); i++) {
+            char letraActual = text.charAt(i);
+            // Si la letra actual coincide con la mayúscula o la minúscula incrementamos cuenta
+            if (letraActual == lowerC || letraActual == upperC) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /** 
+     * isPasswordSafe
+     * Esta consiste en validar si contraseña es segura cumpliendo unos requisitos:
+     * 1. Tener al menos 8 caracteres
+     * 2. Que tenga una mayúscula
+     * 3. Que tenga una minúscula
+     * 4. Que tenga un dígito
+     * 5. Que tenga un caracter especial
+     */
+    public static boolean isPasswordSafe(String password) {
+        // 1. Si mide menos de 8 caracteres, descartado
+        if (password.length() < 8) {
+            return false;
+        }
+
+        // 2. Ponemos todo en false (interruptores)
+        boolean hasUpper = false;
+        boolean hasLower = false;
+        boolean hasDigit = false;
+        boolean hasSpecial = false;
+
+        // 3. Recorremos contraseña carácter por carácter
+        for (int i = 0; i < password.length(); i++) {
+            char ch = password.charAt(i);
+
+            // ¿Es una letra mayúscula?
+            if (Character.isUpperCase(ch)) {
+                hasUpper = true; // Encontramos una mayúscula -> Encendemos el interruptor.
+            }
+            // ¿Es una letra minúscula?
+            else if (Character.isLowerCase(ch)) {
+                hasLower = true; // Encontramos una minúscula -> Encendemos el interruptor.
+            }
+            // ¿Es un número?
+            else if (Character.isDigit(ch)) {
+                hasDigit = true; // Encontramos un dígito -> Encendemos el interruptor.
+            }
+            // ¿Es uno de los caracteres especiales permitidos (?, #, ,)?
+            else if (ch == '?' || ch == '#' || ch == ',') {
+                hasSpecial = true; // Encontramos un carácter especial -> Encendemos el interruptor.
+            }
+        }
+
+        // 4. Devuelve true si TODOS los interruptores terminaron en true.
+        return hasUpper && hasLower && hasDigit && hasSpecial;
+    }
+}
