@@ -25,21 +25,6 @@ public class StringCount {
             return 0;
         }
 
-        int count = 0;
-        for (int i = 0; i < text.length(); i++) {
-            if (text.charAt(i) == c) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    // Cuenta cuántas veces aparece un carácter ignorando mayúsculas y minúsculas.
-    public static int countCharIgnoringCase(String text, char c) {
-        if (text == null || text.isEmpty()) {
-            return 0;
-        }
-
         char lowerC = Character.toLowerCase(c);
         char upperC = Character.toUpperCase(c);
         int count = 0;
@@ -47,6 +32,23 @@ public class StringCount {
         for (int i = 0; i < text.length(); i++) {
             char current = text.charAt(i);
             if (current == lowerC || current == upperC) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+
+    // Cuenta cuántas veces aparece un carácter ignorando mayúsculas y minúsculas.
+    public static int countCharIgnoringCase(String text, char c) {
+        if (text == null || text.isEmpty()) {
+            return 0;
+        }
+
+        
+        int count = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == c) {
                 count++;
             }
         }
