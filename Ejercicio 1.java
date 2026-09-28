@@ -1,3 +1,4 @@
+package e1;
 public class StringCount {
 
     // String Count (contar el nº de palabras de una cadena sabiendo que están separadas por 1 o más espacios)
