@@ -1,4 +1,4 @@
-package e1;
+package e2;
 public class Distance {
 
     /**
