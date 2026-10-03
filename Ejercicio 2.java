@@ -1,109 +1,128 @@
 package e2;
+
 public class Distance {
 
     /**
-     * Función principal del ejercicio.
-     * Aplica las reglas de sentarse y levantarse hasta que el aula se estabiliza.
+     * Función principal que resuelve el problema.
+     * Modifica el estado de los asientos iteración a iteración hasta que
+     * no haya más cambios (el sistema se estabilice).
      */
     public static char[][] seatingPeople(char[][] layout) {
 
-        // Validación layaout (el parámetro)
+        // 1. Primero comprobamos que la matriz de entrada sea correcta
         validateLayout(layout);
 
-        // Copiamos el layout inicial para trabajar sobre él
+        // 2. Hacemos una copia inicial para no modificar los datos originales directamente
         char[][] current = copy(layout);
 
+        // 3. Bucle infinito que romperemos cuando la matriz no cambie respecto al paso anterior
         while (true) {
-            // Calculamos la siguiente iteración sin modificar la actual
+            // Calculamos el estado de las sillas en el siguiente instante de tiempo
             char[][] next = computeNext(current);
 
-            // Si no hay cambios (si next es igual que current) , hemos llegado al estado final
+            // Si el estado actual y el siguiente son idénticos, hemos llegado al equilibrio
             if (areEqual(current, next)) {
-                return next;
+                return next; // Matriz final estabilizada
             }
 
-            // Si hay cambios, seguimos iterando
+            // Si ha habido cambios, actualizamos 'current' para la siguiente iteración
             current = next;
         }
     }
 
     /**
-     * Comprueba que el layout es válido:
-     * - No es null
-     * - No es ragged (todas las filas tienen la misma longitud / es una matriz regular)
-     * - Solo contiene '.' o 'A'
+     * Valida que la matriz cumpla con los requisitos del enunciado:
+     * - No debe ser nula.
+     * - Debe ser rectangular/cuadrada (todas las filas miden lo mismo, no ragged).
+     * - Solo debe contener caracteres válidos ('.' para suelo y 'A' para asiento libre).
      */
-
-    // La función es privae en vez de public ya que es una función interna que ayuda a la principal (public función)
     private static void validateLayout(char[][] layout) {
-        // Si el aula no existe devuelve error
+        // Comprobar si la matriz no ha sido inicializada
         if (layout == null) {
-            throw new IllegalArgumentException("Layout null");
+            throw new IllegalArgumentException("El layout no puede ser null");
         }
 
-        int cols = layout[0].length; // guarda cuantás columnas tiene la primera fila
+        // Guardamos el número de columnas de la primera fila como referencia
+        int numCols = layout[0].length;
 
-        for (char[] row : layout) { // fila por fila revisando el aula
-
-            // Si el número de columnas no coincide con la primera -> devuelve matriz irregular
-            if (row.length != cols) {
-                throw new IllegalArgumentException("Layout ragged"); // ragged = irregular
+        for (int i = 0; i < layout.length; i++) {
+            // Si alguna fila tiene una longitud distinta a la primera, la matriz es irregular
+            if (layout[i].length != numCols) {
+                throw new IllegalArgumentException("La matriz es irregular (ragged array)");
             }
 
-            // Revisamos los carácteres
-            for (char c : row) {
-                // Si un carácter difrente a  "." o "A" entonces devuelve error
-                if (c != '.' && c != 'A') {  // # no puede aparecer en la matriz entrada tampoco
-                    throw new IllegalArgumentException("Invalid character: " + c);
+            // Validar los caracteres de cada celda
+            for (int j = 0; j < layout[i].length; j++) {
+                char c = layout[i][j];
+                // En el layout inicial solo se permiten '.' y 'A'
+                if (c != '.' && c != 'A') {
+                    throw new IllegalArgumentException("Carácter no permitido en la entrada: " + c);
                 }
             }
         }
     }
 
     /**
-     * Crea una copia del layout.
+     * Crea y devuelve una copia independiente (copia profunda) de la matriz.
+     * Es necesario para no sobreescribir la matriz previa mientras calculamos la nueva.
      */
     private static char[][] copy(char[][] layout) {
-        // Crea matriz vacía del mismo tamaño que layaout
-        char[][] result = new char[layout.length][layout[0].length];
-        for (int i = 0; i < layout.length; i++) {  // copia fila por fila
-            // Copia fila completa de layaout a result ( System.arraycopy copia arrays enteros )
-            System.arraycopy(layout[i], 0, result[i], 0, layout[0].length);
+        int rows = layout.length;
+        int cols = layout[0].length;
+        
+        char[][] replica = new char[rows][cols];
+
+        // Recorremos celda por celda copiando los valores
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                replica[i][j] = layout[i][j];
+            }
         }
-        return result; // devuelve copia del aula
+
+        return replica;
     }
 
     /**
-     * Calcula la siguiente iteración aplicando las reglas:
-     * - Sentarse: 'A' → '#' si no tiene vecinos '#'
-     * - Levantarse: '#' → 'A' si tiene ≥ 4 vecinos '#'
-     * - '.' permanece igual
+     * Calcula la matriz del siguiente paso aplicando las reglas del enunciado:
+     * - Un asiento libre 'A' se ocupa '#' si NO tiene vecinos ocupados alrededor.
+     * - Un asiento ocupado '#' se libera 'A' si tiene 4 o más vecinos ocupados.
+     * - El suelo '.' no cambia nunca.
      */
     private static char[][] computeNext(char[][] current) {
         int rows = current.length;
         int cols = current[0].length;
 
+        // Reservamos memoria para la matriz resultado de esta iteración
         char[][] next = new char[rows][cols];
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
+                char actual = current[r][c];
 
-                char seat = current[r][c];
-
-                if (seat == '.') {
-                    // Los asientos inválidos nunca cambian
+                // Regla 1: El suelo permanece igual
+                if (actual == '.') {
                     next[r][c] = '.';
-                    continue;
-                }
+                } 
+                else {
+                    // Contamos cuántas personas ocupadas ('#') hay en las 8 casillas de alrededor
+                    int ocupadosVecinos = countAdjacent(current, r, c);
 
-                int occupiedNeighbors = countAdjacent(current, r, c);
-
-                if (seat == 'A') {
-                    // Regla de sentarse: si no hay vecinos ocupados
-                    next[r][c] = (occupiedNeighbors == 0) ? '#' : 'A';
-                } else { // seat == '#'
-                    // Regla de levantarse: si tiene 4 o más vecinos ocupados
-                    next[r][c] = (occupiedNeighbors >= 4) ? 'A' : '#';
+                    // Regla 2: Asiento libre 'A'
+                    if (actual == 'A') {
+                        if (ocupadosVecinos == 0) {
+                            next[r][c] = '#'; // Se sienta alguien
+                        } else {
+                            next[r][c] = 'A'; // Sigue libre
+                        }
+                    } 
+                    // Regla 3: Asiento ocupado '#'
+                    else if (actual == '#') {
+                        if (ocupadosVecinos >= 4) {
+                            next[r][c] = 'A'; // Se levanta por agobio
+                        } else {
+                            next[r][c] = '#'; // Sigue ocupado
+                        }
+                    }
                 }
             }
         }
@@ -112,47 +131,47 @@ public class Distance {
     }
 
     /**
-     * Cuenta los vecinos ocupados ('#') alrededor de una posición.
-     * Se revisan las 8 posiciones adyacentes.
+     * Cuenta cuántas casillas adyacentes (en las 8 direcciones) tienen un asiento ocupado ('#').
      */
     private static int countAdjacent(char[][] layout, int r, int c) {
-        int count = 0;
+        int contador = 0;
 
-        // Movimientos relativos a la posición actual
-        int[] moves = {-1, 0, 1};
+        // Generamos los desplazamientos en fila (dr) y columna (dc) desde -1 hasta +1
+        for (int dr = -1; dr <= 1; dr++) {
+            for (int dc = -1; dc <= 1; dc++) {
 
-        for (int dr : moves) {
-            for (int dc : moves) {
+                // Ignoramos la propia casilla central (0, 0)
+                if (dr == 0 && dc == 0) {
+                    continue;
+                }
 
-                // Saltamos la posición central (dr=0, dc=0)
-                if (dr == 0 && dc == 0) continue;
+                int nr = r + dr; // Nueva fila
+                int nc = c + dc; // Nueva columna
 
-                int nr = r + dr;
-                int nc = c + dc;
-
-                // Comprobamos límites
-                if (nr >= 0 && nr < layout.length &&
-                        nc >= 0 && nc < layout[0].length) {
-
+                // Comprobamos que las coordenadas del vecino estén dentro de los límites de la matriz
+                if (nr >= 0 && nr < layout.length && nc >= 0 && nc < layout[0].length) {
+                    // Si el vecino está ocupado, incrementamos el contador
                     if (layout[nr][nc] == '#') {
-                        count++;
+                        contador++;
                     }
                 }
             }
         }
 
-        return count;
+        return contador;
     }
 
     /**
-     * Compara dos matrices para ver si son iguales.
+     * Función auxiliar para comparar si dos matrices bidimensionales de caracteres son iguales celda a celda.
      */
-    private static boolean areEqual(char[][] a, char[][] b) {
-        for (int r = 0; r < a.length; r++) {
-            for (int c = 0; c < a[0].length; c++) {
-                if (a[r][c] != b[r][c]) return false;
+    private static boolean areEqual(char[][] m1, char[][] m2) {
+        for (int i = 0; i < m1.length; i++) {
+            for (int j = 0; j < m1[0].length; j++) {
+                if (m1[i][j] != m2[i][j]) {
+                    return false; // A la primera diferencia, devolvemos false
+                }
             }
         }
-        return true;
+        return true; // Si terminan los bucles sin diferencias, son iguales
     }
 }
