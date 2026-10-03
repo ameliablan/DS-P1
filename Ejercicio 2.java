@@ -5,7 +5,7 @@ public class Distance {
     /**
      * Función principal que resuelve el problema.
      * Modifica el estado de los asientos iteración a iteración hasta que
-     * no haya más cambios (el sistema se estabilice).
+     * no haya más cambios (el sistema se equilibre).
      */
     public static char[][] seatingPeople(char[][] layout) {
 
@@ -63,13 +63,12 @@ public class Distance {
     }
 
     /**
-     * Crea y devuelve una copia independiente (copia profunda) de la matriz.
-     * Es necesario para no sobreescribir la matriz previa mientras calculamos la nueva.
+     * Crea y devuelve una copia independiente de la matriz.
      */
     private static char[][] copy(char[][] layout) {
         int rows = layout.length;
         int cols = layout[0].length;
-        
+
         char[][] replica = new char[rows][cols];
 
         // Recorremos celda por celda copiando los valores
@@ -102,7 +101,7 @@ public class Distance {
                 // Regla 1: El suelo permanece igual
                 if (actual == '.') {
                     next[r][c] = '.';
-                } 
+                }
                 else {
                     // Contamos cuántas personas ocupadas ('#') hay en las 8 casillas de alrededor
                     int ocupadosVecinos = countAdjacent(current, r, c);
@@ -114,11 +113,11 @@ public class Distance {
                         } else {
                             next[r][c] = 'A'; // Sigue libre
                         }
-                    } 
+                    }
                     // Regla 3: Asiento ocupado '#'
                     else if (actual == '#') {
                         if (ocupadosVecinos >= 4) {
-                            next[r][c] = 'A'; // Se levanta por agobio
+                            next[r][c] = 'A'; // Se levanta
                         } else {
                             next[r][c] = '#'; // Sigue ocupado
                         }
@@ -162,7 +161,7 @@ public class Distance {
     }
 
     /**
-     * Función auxiliar para comparar si dos matrices bidimensionales de caracteres son iguales celda a celda.
+     * Función auxiliar para comparar si dos matrices son iguales celda a celda.
      */
     private static boolean areEqual(char[][] m1, char[][] m2) {
         for (int i = 0; i < m1.length; i++) {
